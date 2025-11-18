@@ -28,3 +28,6 @@ pip-wheel-metadata/
 logs/
 *.log
 
+Dataset/raw/
+Dataset/processed/*.csv
+Model/*.pkl
