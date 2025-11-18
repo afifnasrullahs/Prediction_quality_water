@@ -1,0 +1,30 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.DS_Store
+Thumbs.db
+
+# Virtualenv / pyenv
+venv/
+ENV/
+.env
+.venv
+pip-wheel-metadata/
+
+# IDE / tools
+.vscode/
+.idea/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Streamlit cache
+.streamlit/
+
+# Logs / misc
+logs/
+*.log
+
