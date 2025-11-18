@@ -18,12 +18,16 @@ class AppConfig:
 
     FEATURE_COLUMNS: List[str] = ["flow1", "flow2", "turbidity", "tds", "ph"]
     LABEL_COLUMN: str = "quality_label"
-    ALLOWED_LABELS: List[str] = ["Biru", "Coklat", "Orange", "putih"]
+    ALLOWED_LABELS: List[str] = ["Biru", "Coklat", "Orange", "Putih"]
     DISPLAY_LABELS: Dict[str, str] = {
         "Biru": "Biru",
         "Coklat": "Cokelat",
         "Orange": "Orange",
-        "putih": "Putih",
+        "Putih": "Putih"
+    }
+    MODEL_FEATURE_COLUMNS: Dict[str, List[str]] = {
+        "panelA": ["flow1", "turbidity", "ph", "tds"],
+        "panelB": ["flow1", "turbidity", "ph", "tds", "flow2"],
     }
 
     # LLM / Groq
@@ -33,43 +37,40 @@ class AppConfig:
     # Paths (dataset dan model)
     ROOT_DIR: Path = ROOT_DIR
     DATASET_PATHS: Dict[str, Path] = {
-        "panelA": ROOT_DIR / "Dataset" / "processed" / "panelAs_labeled.csv",
-        "panelB": ROOT_DIR / "Dataset" / "processed" / "panelBs_labeled.csv",
-        # Model overall memakai dataset Panel B (hasil terbaik)
-        "overall": ROOT_DIR / "Dataset" / "processed" / "panelBs_labeled.csv",
+        "panelA": ROOT_DIR / "Dataset" / "Processed" / "panelAs_labeled.csv",
+        "panelB": ROOT_DIR / "Dataset" / "Processed" / "panelBs_labeled.csv",
     }
     MODEL_PATHS: Dict[str, Dict[str, Path]] = {
-        "overall": {
-            "model": ROOT_DIR / "Model" / "best_model_overall.pkl",
-            "scaler": ROOT_DIR / "Model" / "scaler_overall.pkl",
-            "encoder": ROOT_DIR / "Model" / "label_encoder_overall.pkl",
-            "metadata": ROOT_DIR / "Model" / "model_metadata_overall.pkl",
+        "panelA": {
+            "model": ROOT_DIR / "Model" / "model_Panel_A_XGBoost.pkl",
+            "scaler": ROOT_DIR / "Model" / "scaler_Panel_A.pkl",
+            "encoder": ROOT_DIR / "Model" / "label_encoder_Panel_A.pkl",
         },
     }
 
     MODEL_PERFORMANCE: Dict[str, Dict[str, Dict[str, float]]] = {
         "panelA": {
-            "Logistic Regression": {"train": 0.8317, "test": 0.8044},
+            "Logistic Regression": {"train": 0.8791, "test":  0.8991},
             "Random Forest": {"train": 1.0, "test": 1.0},
-            "XGBoost": {"train": 0.9983, "test": 0.9981},
+            "XGBoost": {"train": 0.9990, "test": 0.9987},
         },
         "panelB": {
-            "Logistic Regression": {"train": 0.8416, "test": 0.9023},
-            "Random Forest": {"train": 0.9440, "test": 0.9547},
-            "XGBoost": {"train": 0.9347, "test": 0.9535},
+            "Logistic Regression": {"train": 0.9336, "test": 0.9229},
+            "Random Forest": {"train": 1.0, "test": 1.0},
+            "XGBoost": {"train": 0.9998, "test": 0.9997},
         },
     }
 
     CONFUSION_MATRIX_IMAGES: Dict[str, Dict[str, Path]] = {
         "panelA": {
-            "Logistic Regression": ROOT_DIR / "Model" / "cm_Panel_A_Logistic_Regression.png",
-            "Random Forest": ROOT_DIR / "Model" / "cm_Panel_A_Random_Forest.png",
-            "XGBoost": ROOT_DIR / "Model" / "cm_Panel_A_XGBoost.png",
+            "Logistic Regression": ROOT_DIR / "Model" / "cm_test_Panel_A_Logistic_Regression.png",
+            "Random Forest": ROOT_DIR / "Model" / "cm_test_Panel_A_Random_Forest.png",
+            "XGBoost": ROOT_DIR / "Model" / "cm_test_Panel_A_XGBoost.png",
         },
         "panelB": {
-            "Logistic Regression": ROOT_DIR / "Model" / "cm_Panel_B_Logistic_Regression.png",
-            "Random Forest": ROOT_DIR / "Model" / "cm_Panel_B_Random_Forest.png",
-            "XGBoost": ROOT_DIR / "Model" / "cm_Panel_B_XGBoost.png",
+            "Logistic Regression": ROOT_DIR / "Model" / "cm_test_Panel_B_Logistic_Regression.png",
+            "Random Forest": ROOT_DIR / "Model" / "cm_test_Panel_B_Random_Forest.png",
+            "XGBoost": ROOT_DIR / "Model" / "cm_test_Panel_B_XGBoost.png",
         },
     }
 

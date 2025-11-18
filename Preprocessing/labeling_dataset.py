@@ -9,18 +9,40 @@ os.makedirs(out_dir, exist_ok=True)
 def get_label(row):
     ph = row['ph']
     turb = row['turbidity']
-    tds  = row['tds']
+    tds = row['tds']
 
-    if (ph < 5.0 or ph > 9.5) or (turb > 30) or (tds > 1500):
-        return"Coklat"
-    elif (5.0 <= ph <= 6.0 or 8.5 <= ph <= 9.5) or (15 <= turb <= 30) or (800 <= tds <= 1500):
+    
+    coklat_conditions = [
+        (ph < 5.0 or ph > 9.5),
+        turb > 30,
+        tds > 1500
+    ]
+    if sum(coklat_conditions) >= 1:
+        return "Coklat"
+
+   
+    orange_conditions = [
+        (5.0 <= ph <= 6.0 or 8.5 <= ph <= 9.0),
+        (15 <= turb <= 22.5),
+        (800 <= tds <= 1150)
+    ]
+    if sum(orange_conditions) >= 2:
         return "Orange"
-    elif (6.0 <= ph <= 6.5 or 8.0 <= ph <= 8.5) or (5 <= turb <= 15) or (500 <= tds <= 800):
+
+    
+    biru_conditions = [
+        (6.0 <= ph <= 6.5 or 9.0 <= ph <= 9.5),
+        (22.5 <= turb <= 30),
+        (1150 <= tds <= 1500)
+    ]
+    if sum(biru_conditions) >= 2:
         return "Biru"
-    elif (6.5 <= ph <= 8.0) and (turb < 5) and (tds < 500):
-        return "putih"
-    else:
-        return "tidak ada"
+
+ 
+    if (6.5 <= ph <= 8.0) and (turb < 5) and (tds < 500):
+        return "Putih"
+
+    return "Tidak Ada"
 
 # Labeling dataset A
 file1 = r"C:\Users\afifn\Documents\TES MULTIMEDIA SOLUSI PRIMA\Dataset\raw\_PanelAs__202505281600 new.csv"

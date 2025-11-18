@@ -37,87 +37,18 @@ class PanelModel:
             self.feature_columns = joblib.load(artifacts["feature_columns"])
         elif self.metadata and "features" in self.metadata:
             self.feature_columns = list(self.metadata["features"])
+        elif panel in AppConfig.MODEL_FEATURE_COLUMNS:
+            self.feature_columns = AppConfig.MODEL_FEATURE_COLUMNS[panel]
         else:
             self.feature_columns = AppConfig.FEATURE_COLUMNS
-        self.uses_temporal_features = "feature_columns" in artifacts
         self._evaluation: ModelEvaluation | None = None
-
-    def _create_temporal_features(self, df: pd.DataFrame, features: List[str] = None) -> pd.DataFrame:
-        """
-        Create temporal features from dataframe (for evaluation).
-        Same logic as in notebook: lag, rolling stats, delta.
-        """
-        if features is None:
-            features = AppConfig.FEATURE_COLUMNS
-        
-        df = df.copy()
-        
-        # Sort by timestamp if available
-        if 'timestamp' in df.columns:
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df = df.sort_values('timestamp').reset_index(drop=True)
-        
-        for feature in features:
-            # Lag features (previous values)
-            df[f'{feature}_lag1'] = df[feature].shift(1)
-            df[f'{feature}_lag2'] = df[feature].shift(2)
-            df[f'{feature}_lag3'] = df[feature].shift(3)
-            
-            # Rolling statistics (window=5)
-            df[f'{feature}_rolling_mean'] = df[feature].rolling(window=5, min_periods=1).mean()
-            df[f'{feature}_rolling_std'] = df[feature].rolling(window=5, min_periods=1).std().fillna(0)
-            
-            # Rate of change (delta)
-            df[f'{feature}_delta'] = df[feature].diff().fillna(0)
-            
-            # Rolling min/max
-            df[f'{feature}_rolling_min'] = df[feature].rolling(window=5, min_periods=1).min()
-            df[f'{feature}_rolling_max'] = df[feature].rolling(window=5, min_periods=1).max()
-        
-        # Fill NaN in lag features with forward fill, then backward fill
-        lag_cols = [col for col in df.columns if 'lag' in col]
-        if lag_cols:
-            df[lag_cols] = df[lag_cols].ffill().bfill()
-        
-        # If still any NaN, fill with 0
-        df = df.fillna(0)
-        
-        return df
 
     def _prepare_features_for_prediction(self, payload: Dict[str, float]) -> pd.DataFrame:
         """
-        Prepare features for real-time prediction.
-        When temporal features are required, we synthesize stats; otherwise we
-        just align payload values with expected feature ordering.
+        Prepare features for real-time prediction by aligning payload with the
+        expected feature order.
         """
-        feature_row: Dict[str, float]
-        if self.uses_temporal_features:
-            base_features = AppConfig.FEATURE_COLUMNS
-            feature_dict = {}
-
-            for feature in base_features:
-                value = payload.get(feature, 0.0)
-
-                # Base feature
-                feature_dict[feature] = value
-
-                # Lag features (use current value as default since no history)
-                feature_dict[f"{feature}_lag1"] = value
-                feature_dict[f"{feature}_lag2"] = value
-                feature_dict[f"{feature}_lag3"] = value
-
-                # Rolling statistics (use current value)
-                feature_dict[f"{feature}_rolling_mean"] = value
-                feature_dict[f"{feature}_rolling_std"] = 0.0
-                feature_dict[f"{feature}_rolling_min"] = value
-                feature_dict[f"{feature}_rolling_max"] = value
-
-                # Delta (no change)
-                feature_dict[f"{feature}_delta"] = 0.0
-
-            feature_row = {feat: feature_dict.get(feat, 0.0) for feat in self.feature_columns}
-        else:
-            feature_row = {feat: payload.get(feat, 0.0) for feat in self.feature_columns}
+        feature_row = {feat: payload.get(feat, 0.0) for feat in self.feature_columns}
 
         return pd.DataFrame([feature_row], columns=self.feature_columns)
 
@@ -136,13 +67,7 @@ class PanelModel:
             return self._evaluation
 
         df = self.dataset.filtered_df()
-
-        if self.uses_temporal_features:
-            df_with_features = self._create_temporal_features(df)
-        else:
-            df_with_features = df.copy()
-
-        df_with_features = self._ensure_feature_columns(df_with_features)
+        df_with_features = self._ensure_feature_columns(df.copy())
 
         # Select features in the order expected by model
         X = df_with_features[self.feature_columns]

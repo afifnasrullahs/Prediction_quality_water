@@ -5,7 +5,7 @@ A Streamlit dashboard to inspect sensor datasets, review model performance, and 
 ## Features
 - **Data & Info**: summary statistics, label distributions, and sample rows for Panel A & B datasets.
 - **Model & Evaluasi**: fixed benchmarking table per panel (Logistic Regression, Random Forest, XGBoost) plus confusion matrices from `Model/*.png`.
-- **Simulasi Prediksi**: interactive form accepting `flow1`, `flow2`, `turbidity`, `tds`, `ph`. The best overall model (`Model/best_model_overall.pkl`) generates quality labels and triggers the Groq recommendation service.
+- **Simulasi Prediksi**: interactive form accepting `flow1`, `flow2`, `turbidity`, `tds`, `ph`. The XGBoost Panel A model (`Model/model_Panel_A_XGBoost.pkl`) generates quality labels and triggers the Groq recommendation service.
 
 ## Project Structure
 ```

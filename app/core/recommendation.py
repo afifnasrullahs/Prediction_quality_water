@@ -33,14 +33,14 @@ class GroqRecommender:
     def _build_prompt(payload: Dict[str, float], predicted_label: str) -> str:
         template = (
             "Anda adalah pakar kualitas air. Fokuskan analisis hanya pada parameter berikut:\n"
-            "- turbidity: {turbidity}\n"
-            "- tds: {tds}\n"
-            "- ph: {ph}\n\n"
-            "Model memprediksi kualitas air: {label}.\n"
+            f"- turbidity: {payload['turbidity']}\n"
+            f"- tds: {payload['tds']}\n"
+            f"- ph: {payload['ph']}\n\n"
+            f"Model memprediksi kualitas air: {predicted_label}.\n"
             "Balas dalam Bahasa Indonesia dengan format PERSIS dua baris berikut (tanpa kata tambahan):\n"
-            "Interpretasi: <jelaskan kondisi air, sebutkan angka turbidity (bandingkan dengan batas ideal 1 NTU), TDS (bandingkan dengan batas 500 mg/L), pH (ideal 6.5-8.5) dan jelaskan dampak bila nilai menyimpang; minimal 25 kata>\n"
-            "Rekomendasi: <usulkan langkah treatment praktis dan sangat spesifik (contoh: filter cartridge 1 mikron, RO 75 GPD, resin kation kuat, injeksi soda ash) serta jelaskan alasan teknisnya terhadap parameter yang bermasalah; minimal 20 kata>\n"
-            "Setiap baris wajib diawali kata kunci di atas, tidak boleh ada baris lain, dan jangan menyebut parameter aliran."
+            "Interpretasi: <jelaskan kondisi air, sebutkan angka turbidity (bandingkan dengan batas Permenkes 2023 yaitu 3 NTU), TDS (bandingkan dengan batas 300 mg/L), pH (ideal 6.5–8.5 menurut Permenkes 2023), dan jelaskan dampak bila nilai menyimpang; minimal 25 kata>\n"
+            "Rekomendasi: <usulkan langkah treatment praktis dan spesifik yang sesuai dengan kondisi di atas. Gunakan metode yang berbeda jika perlu, misalnya filter, RO, resin, injeksi kimia, UV, dsb., dan jelaskan alasan teknisnya terhadap parameter bermasalah; minimal 20 kata>\n"
+            "Setiap baris wajib diawali kata kunci di atas, tidak boleh ada baris lain, dan jangan menyebut parameter aliran. Hindari mengulang persis contoh yang diberikan."
         )
         return template.format(**payload, label=predicted_label)
 

@@ -29,12 +29,28 @@ class PanelDataset:
     @property
     def df(self) -> pd.DataFrame:
         if self._df is None:
-            self._df = pd.read_csv(self.csv_path)
+            df = pd.read_csv(self.csv_path)
+            label_col = AppConfig.LABEL_COLUMN
+            if label_col in df.columns:
+                df[label_col] = self._normalize_labels(df[label_col])
+            self._df = df
         return self._df
+
+    @staticmethod
+    def _normalize_labels(series: pd.Series) -> pd.Series:
+        """Normalisasi label agar konsisten (case-insensitive, trim, title-case)."""
+        normalized = (
+            series.astype(str)
+            .str.strip()
+            .str.replace(r"\s+", " ", regex=True)
+            .str.title()
+        )
+        return normalized
 
     def filtered_df(self) -> pd.DataFrame:
         allowed = AppConfig.ALLOWED_LABELS
-        return self.df[self.df[AppConfig.LABEL_COLUMN].isin(allowed)].copy()
+        filtered = self.df[self.df[AppConfig.LABEL_COLUMN].isin(allowed)].copy()
+        return filtered
 
     def get_summary(self, sample_size: int = 5) -> DatasetSummary:
         filtered = self.filtered_df().copy()

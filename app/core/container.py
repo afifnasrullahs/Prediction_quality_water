@@ -21,7 +21,17 @@ class ApplicationContainer:
         datasets: Dict[str, PanelDataset] = {
             panel: data_repo.get_dataset(panel) for panel in data_repo.list_panels()
         }
-        model_registry = ModelRegistry(datasets, AppConfig.MODEL_PATHS)
+
+        # Pastikan setiap model memiliki pasangan dataset yang konsisten
+        model_datasets: Dict[str, PanelDataset] = {}
+        fallback_dataset = next(iter(datasets.values())) if datasets else None
+        for model_panel in AppConfig.MODEL_PATHS.keys():
+            if model_panel in datasets:
+                model_datasets[model_panel] = datasets[model_panel]
+            elif fallback_dataset:
+                model_datasets[model_panel] = fallback_dataset
+
+        model_registry = ModelRegistry(model_datasets, AppConfig.MODEL_PATHS)
         recommender = GroqRecommender()
         return cls(
             data_repository=data_repo,
